@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 def parse_file(file_name, stop_words):
     """
     Parse the file, remove non-letter characters, and convert to lowercase.
@@ -8,10 +6,8 @@ def parse_file(file_name, stop_words):
     words = []
     with open(file_name, 'r', encoding='utf-8') as file:
         for line in file:
-            # Split the line into words
             line_words = line.split()
             for word in line_words:
-                # Remove non-alphabetic characters and convert to lowercase
                 cleaned_word = ''.join(char for char in word if char.isalpha()).lower()
                 if cleaned_word and cleaned_word not in stop_words:
                     words.append(cleaned_word)
@@ -21,9 +17,12 @@ def generate_word_length_sets(words):
     """
     Generate a dictionary of word sets by their lengths.
     """
-    word_length_sets = defaultdict(set)
+    word_length_sets = {}
     for word in words:
-        word_length_sets[len(word)].add(word)
+        length = len(word)
+        if length not in word_length_sets:
+            word_length_sets[length] = set()
+        word_length_sets[length].add(word)
     return word_length_sets
 
 def print_word_length_sets(word_length_sets):
@@ -33,26 +32,23 @@ def print_word_length_sets(word_length_sets):
     """
     max_length = max(word_length_sets.keys(), default=9)
     for length in range(1, max_length + 1):
-        words = sorted(word_length_sets[length])
+        words = sorted(word_length_sets.get(length, []))
         word_count = len(words)
-
-        # Print the length and word count
         print("  {:2d}: {:3d}:".format(length, word_count), end="")
-
-        # Check if we need to add words after the semicolon
         if word_count > 0:
             if word_count > 6:
-                # Print the first 3 words, an ellipsis, and the last 3 words
                 words_display = " ".join(words[:3]) + " ... " + " ".join(words[-3:])
             else:
-                # Print all words if there are less than or equal to 6
                 words_display = " ".join(words)
-
-            # Print the words with a space after the semicolon
             print(" " + words_display)
         else:
-            # No words to display after the semicolon
             print()
+
+# Example usage
+stop_words = {"and", "the", "to", "of", "a"}
+words = parse_file("example.txt", stop_words)
+word_length_sets = generate_word_length_sets(words)
+print_word_length_sets(word_length_sets)
 
 
 def calculate_average_word_length(words):
